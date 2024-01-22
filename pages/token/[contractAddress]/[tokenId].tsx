@@ -3,9 +3,11 @@ import {
   ThirdwebNftMedia,
   useContract,
   useContractEvents,
+  useOwnedNFTs,
   useValidDirectListings,
   useValidEnglishAuctions,
   Web3Button,
+  useAddress,
 } from "@thirdweb-dev/react";
 import React, { useState } from "react";
 import Container from "../../../components/Container/Container";
@@ -33,6 +35,7 @@ const [randomColor1, randomColor2] = [randomColor(), randomColor()];
 
 export default function TokenPage({ nft, contractMetadata }: Props) {
   const [bidValue, setBidValue] = useState<string>();
+  const address = useAddress();
 
   // Connect to marketplace smart contract
   const { contract: marketplace, isLoading: loadingContract } = useContract(
@@ -42,6 +45,8 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
 
   // Connect to NFT Collection smart contract
   const { contract: nftCollection } = useContract(NFT_COLLECTION_ADDRESS);
+
+  const { data: ownedNfts } = useOwnedNFTs(nftCollection, address as string);
 
   const { data: directListing, isLoading: loadingDirect } =
     useValidDirectListings(marketplace, {
@@ -282,6 +287,8 @@ export default function TokenPage({ nft, contractMetadata }: Props) {
 
             {loadingContract || loadingDirect || loadingAuction ? (
               <Skeleton width="100%" height="164" />
+            ) : (ownedNfts?.length ?? 0) >= 2 ? (
+              <p style={{textAlign : "center", fontWeight: "bold"}}>You already have 2 NFTs</p>
             ) : (
               <>
                 <Web3Button
